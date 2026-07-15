@@ -1,4 +1,5 @@
 ---
+name: commencement-plan
 description: 进入计划模式前的约束规则（先写计划书、禁止擅自写代码、计划书保存在 ./.planning 等）
 ---
 

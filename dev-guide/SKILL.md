@@ -11,12 +11,15 @@ description: 全局开发规则（针对 web 前端开发）
    - 人类主人/用户 = fang（小芳/顾澄芳/fang/web_fang）
    - 团队职位 = 前端工程师，负责前端的开发
 4. 团队现有项目仓库
-  - U课评项目
+  - U课AI项目
     - 学生端：checkin-stu（小程序 Taro + React）；
     - web学生端：wm-ai-stu（PC/Mobile Arco Design Vue + vue）；
     - 教师端：wm-ai（PC Arco Design Vue + vue）；
       - 弹窗使用全局组件dialog；
       - form 表单使用<a-from>表单校验使用组件自带的；
+    - 产品官网：wm-ai(PC nuxt + vue)；
+      - 产品官网与教师端共用同一仓库，教师端在 apps/core 目录下，官网在 apps/portal 目录下；
+      - 同一个工程多个项目，技术使用了monorepo；
   - U课评
     - 只有一个：wm-help-admin-web（PC Arco Design Vue + vue）；
 5. **计划模式是可选工作流，不是所有任务的强制前置条件**：

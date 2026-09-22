@@ -30,12 +30,7 @@
    - 小需求、独立 Bug、简单修改若未调用 `/plan-start`，不得强制用户先建计划文件；用户明确说“修复/实现/修改”即视为允许在完成必要排查后直接实施。若用户只是报告现象、询问原因或要求分析，不得擅自改代码。
    - 即使不使用计划模式，遇到需求矛盾、高风险数据变更、权限、安全、金额/成绩等关键计算、不可逆迁移或影响范围不清时，也必须先向用户确认关键口径。
    - 计划文件头部必须有描述性元信息；每次讨论或开发结束后回顾头部状态是否需要更新。
-7. **Plannotator 调用必须由用户显式授权，AI 不得自主打开**：
-   - `skill:plannotator-annotate` 仅供人类审查、批注和讨论计划；`skill:plannotator-review` 仅供人类审查代码。
-   - AI 可以在合适时机提示用户可进行计划讨论或代码审查，但不得因计划完成、代码修改完成、需要验证或任何其他自主判断而调用任一 `skill:plannotator-*`。
-   - 只有用户在当前对话明确要求打开相应计划、代码审查，或明确指定调用相应 Plannotator 技能时，才可调用；不得将历史授权或泛化的“继续”理解为授权。
-   - 经用户明确授权后，使用 `skill:plannotator-*` 的超时时间统一设置为半小时。
-8. Vue 专属规则：
+7. Vue 专属规则：
    - 新建vue文件的结构为，一般采用 setup 语法糖:
       ```vue
       <script setup lang="ts">
@@ -47,7 +42,7 @@
       ```
       script 模块在前，template 模块在中间，style 模块在最后，这么做是更加方便开发，template 模块在中间能够同时与两个模块进行交互
    - 本条只约束 Vue；其他语言应按对应项目工具链执行适当的格式化、类型检查、编译或测试，除非用户明确禁止。
-9. 接口规范：
+8. 接口规范：
    - 要求所有新建请求函数命名以fetch开头,例如fetchCourseDetail，fetchCourseList，并且如果没给具体的后端接口 path，先返回空。
    - 请求以async/await方式，默认不处理错误，处理错误默认先提示，参考以下代码片段
       ```typescript
@@ -60,7 +55,7 @@
          // 其他逻辑
       }
       ```
-10. 前端代码规范：
+9. 前端代码规范：
    - 不执行lint-fix，也就是不用修复 lint 错误
    - 尽量不修改原先代码，修改原先代码需要说明原因
    - 对于整页的初始请求，使用indicator，位于@/hooks 目录下，并优先使用 try-catch处理异步请求
@@ -84,9 +79,9 @@
    - 计划模式下把验证项写入对应步骤；非计划模式采用与改动规模相称的轻量验证，不强制建立计划。
 ## Orca 浏览器与网页工具
 
-1. 详细指导见 `/home/jenson/.pi/agent/docs/orca-browser-guide.md`。
+1. 详细指导见 `~/.pi/agent/docs/orca-browser-guide.md`。
 2. 关键词搜索使用 `web_search`；已知公开 URL 使用 `web_fetch`；不因当前处于 Orca 工作区就强制改用 Orca。
 3. 如果目标 URL 已在 Orca 内嵌浏览器打开，或页面需要登录、Cookie、当前会话状态，则优先使用 Orca 浏览器链路。
 4. 准备使用 Orca 链路前，先确认当前会话属于 Orca 管理的终端：至少检查 `ORCA_TERMINAL_HANDLE`、`ORCA_WORKTREE_ID`，再核对 `worktree current --json` 和 `status --json`。
-5. Orca CLI 统一使用 `/home/jenson/.pi/agent/bin/orca-cli-safe`，禁止直接调用 `/home/jenson/.local/bin/orca-ide`，也不要显式传递 `--no-sandbox`。
+5. Orca CLI 统一使用 `~/.pi/agent/bin/orca-cli-safe`，禁止直接调用 `~/.local/bin/orca-ide`，也不要显式传递 `--no-sandbox`。
 6. 外部终端仍可正常使用 `web_search` 和 `web_fetch`；需要登录的页面无法使用外部网页抓取时，应提示用户切换到 Orca 工作区。

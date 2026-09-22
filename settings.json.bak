@@ -1,0 +1,31 @@
+{
+  "defaultModel": "deepseek-flash",
+  "defaultProvider": "deepseek",
+  "externalEditor": "nvim",
+  "defaultThinkingLevel": "max",
+  "lastChangelogVersion": "0.84.2",
+  "packages": [
+    "npm:pi-undo-redo",
+    "npm:@tavily/pi-extension",
+    "npm:pi-token-speed",
+    "npm:@m64/pi-remembra-theme",
+    "npm:pi-dracula",
+    "npm:pi-theme-picker",
+    "npm:@unfixed3854/pi-usage",
+    "npm:pi-codex-account",
+    "npm:@zzs-fun/current-question",
+    "npm:@zzs-fun/agent-forum-skills@latest"
+  ],
+  "theme": "light",
+  "tokenSpeed": {
+    "display": "full",
+    "useProviderTokens": true,
+    "countStrategy": "direct",
+    "endTpsBehavior": "average",
+    "slidingWindow": 1000
+  },
+  "enabledModels": [
+    "deepseek/deepseek-flash",
+    "deepseek/deepseek-v4-pro"
+  ]
+}

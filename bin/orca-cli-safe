@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# 直接调用当前 Orca 运行实例中的内置 CLI，避免 AppRun 改写 Electron Node 参数。
+find_mount() {
+  local candidate base
+
+  if [[ -n "${ORCA_CODEX_LAUNCH_PREFLIGHT:-}" ]]; then
+    candidate="${ORCA_CODEX_LAUNCH_PREFLIGHT%/resources/bin/orca-ide}"
+    if [[ -x "$candidate/orca-ide" && -f "$candidate/resources/app.asar.unpacked/out/cli/index.js" ]]; then
+      printf '%s\n' "$candidate"
+      return 0
+    fi
+  fi
+
+  while IFS= read -r -d '' base; do
+    if [[ -x "$base/orca-ide" && -f "$base/resources/app.asar.unpacked/out/cli/index.js" ]]; then
+      printf '%s\n' "$base"
+      return 0
+    fi
+  done < <(find /tmp -maxdepth 1 -type d -name '.mount_orca-*' -print0 2>/dev/null)
+
+  return 1
+}
+
+MOUNT="$(find_mount || true)"
+if [[ -z "$MOUNT" ]]; then
+  echo "未找到正在运行的 Orca 实例，请先启动 Orca。" >&2
+  exit 1
+fi
+
+export ORCA_NODE_OPTIONS="${NODE_OPTIONS-}"
+export ORCA_NODE_REPL_EXTERNAL_MODULE="${NODE_REPL_EXTERNAL_MODULE-}"
+unset NODE_OPTIONS
+unset NODE_REPL_EXTERNAL_MODULE
+
+APPDIR="$MOUNT" ELECTRON_RUN_AS_NODE=1 exec "$MOUNT/orca-ide" -e '(async()=>{try{const path=require("path");const cli=path.join(process.env.APPDIR,"resources","app.asar.unpacked","out","cli","index.js");await Promise.resolve(require(cli).main(process.argv.slice(1)));}catch(error){console.error(error&&error.stack?error.stack:String(error));process.exit(1);}})();' -- "$@"

@@ -14,7 +14,7 @@ author: fang
    - `mode=active`：使用其中的`需求`确定需求目录。
 2. 执行：
    ```bash
-   node ~/.pi/agent/bin/plan-build.mjs ./.planning/<需求>
+   node ~/.agents/skills/plan-start/scripts/plan-build.mjs ./.planning/<需求>
    ```
 3. 向用户报告：
    - 生成的 `build/plan.html` 路径；

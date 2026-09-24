@@ -1,10 +1,15 @@
 #!/usr/bin/env bash
 #
-# sync-to-agents.sh — 单向同步 pi 配置根源到 ~/.agents/skills（共享给其它 agent）
+# sync-to-agents.sh — 校验 pi 侧（软链/薄壳）与 ~/.agents/skills 唯一源的一致性
 #
 # 作者：fang
-# 根源（source of truth）：本仓库，即 /Users/gcf/.pi/agent
-# 目标：~/.agents/skills
+# 唯一源（source of truth）：~/.agents/skills
+# 派生物：本仓库 pi 侧（软链 + 入口薄壳）
+#
+# 方向说明（两个 skill 均以 ~/.agents/skills 为唯一源）：
+#   - common-guide：唯一规则源是 ~/.agents/skills/common-guide/SKILL.md，pi 的 AGENTS.md 为软链；
+#   - plan-start：唯一实现源是 ~/.agents/skills/plan-start（协议 + core + scripts），pi 侧为软链 + 薄壳。
+#   本脚本只做一致性校验，不再向 ~/.agents/skills 复制内容，避免覆盖唯一源。
 #
 # 用法：
 #   bin/sync-to-agents.sh          # dry-run，仅预览差异，不写文件
@@ -27,6 +32,7 @@ case "${1:-}" in
 esac
 
 # sync_one <源相对路径> <目标目录名> <skill name> <源无 description 时的兜底描述>
+# 说明：当前两个 skill 都以 ~/.agents/skills 为唯一源，脚本已不再调用本函数；保留供未来「pi 为源」的同步项使用。
 sync_one() {
   local src_rel="$1" target_dirname="$2" skill_name="$3" fallback_desc="$4"
   local src="${ROOT}/${src_rel}"
@@ -93,18 +99,76 @@ sync_one() {
   rm -f "$tmp"
 }
 
-sync_one "AGENTS.md" \
-  "common-guide" \
-  "common-guide" \
-  "fang 全局开发准则总纲：中文思考与输出、署名、团队项目技术栈、公用组件规范、计划模式、Vue/接口/前端代码规范、Git 权限、同类点排查、决策矩阵、提测验证与 Orca 浏览器。适用于所有开发任务。"
+# common-guide：唯一规则源在 ~/.agents/skills/common-guide，pi 的 AGENTS.md 是指向它的软链，只校验不复制。
+check_common_guide() {
+  local target="${AGENTS_SKILLS}/common-guide/SKILL.md"
+  local link="${ROOT}/AGENTS.md"
+  local ok=1
 
-sync_one "prompts/plan-start.md" \
-  "plan-start" \
-  "start-plan" \
-  "进入计划模式（分片完整档）：建分片计划、零售式讨论、状态落盘，授权后逐步实施"
+  if [[ ! -f "$target" ]]; then
+    echo "!! 唯一规则源缺失: ${target/#$HOME/~}" >&2
+    ok=0
+  elif ! grep -q "^description:" "$target"; then
+    echo "!! 唯一规则源缺少 skill frontmatter（description）: ${target/#$HOME/~}" >&2
+    ok=0
+  fi
+
+  if [[ ! -L "$link" ]]; then
+    echo "!! pi 的 AGENTS.md 应为软链: ${link/#$HOME/~}" >&2
+    ok=0
+  elif [[ "$(readlink "$link")" != "$target" ]]; then
+    echo "!! 软链指向不符: ${link/#$HOME/~} -> $(readlink "$link")" >&2
+    ok=0
+  fi
+
+  if [[ "$ok" -eq 1 ]]; then
+    echo "== common-guide 唯一规则源与 pi 软链一致"
+  fi
+}
+
+check_common_guide
+
+# plan-start：唯一实现源在 ~/.agents/skills/plan-start，pi 侧为软链 + 薄壳，只校验不复制。
+check_plan_start() {
+  local skill_dir="${AGENTS_SKILLS}/plan-start"
+  local ok=1
+  local f link path want
+
+  for f in SKILL.md scripts/plan-mode.mjs scripts/plan-build.mjs core/plan-core.md; do
+    if [[ ! -f "${skill_dir}/${f}" ]]; then
+      echo "!! 唯一实现源缺少: ${skill_dir}/${f}" >&2
+      ok=0
+    fi
+  done
+
+  if ! grep -q "~/.agents/skills/plan-start/SKILL.md" "${ROOT}/prompts/plan-start.md" 2>/dev/null; then
+    echo "!! pi 薄壳未指向唯一实现源: prompts/plan-start.md" >&2
+    ok=0
+  fi
+
+  for link in "${ROOT}/bin/plan-mode.mjs:scripts/plan-mode.mjs" \
+              "${ROOT}/bin/plan-build.mjs:scripts/plan-build.mjs" \
+              "${ROOT}/plan/plan-core.md:core/plan-core.md"; do
+    path="${link%%:*}"
+    want="${skill_dir}/${link##*:}"
+    if [[ ! -L "$path" ]]; then
+      echo "!! pi 侧应为软链: ${path/#$HOME/~}" >&2
+      ok=0
+    elif [[ "$(readlink "$path")" != "$want" ]]; then
+      echo "!! 软链指向不符: ${path/#$HOME/~} -> $(readlink "$path")" >&2
+      ok=0
+    fi
+  done
+
+  if [[ "$ok" -eq 1 ]]; then
+    echo "== plan-start 唯一源与 pi 薄壳一致"
+  fi
+}
+
+check_plan_start
 
 if [[ "$APPLY" -eq 0 ]]; then
-  echo "（dry-run）未写入任何文件；确认无误后执行: bin/sync-to-agents.sh --apply"
+  echo "（校验模式）本脚本当前只做一致性校验，不写入文件"
 else
-  echo "同步完成。"
+  echo "校验完成。"
 fi

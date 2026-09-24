@@ -5,12 +5,12 @@ author: fang
 
 # 同步计划模式（/plan-sync）
 
-用于调整 `~/.pi/agent/plan/plan-core.md` 后，或怀疑当前项目计划协议未生效时。
+用于调整 `~/.agents/skills/plan-start/core/plan-core.md` 后，或怀疑当前项目计划协议未生效时。
 
 执行：
 
 ```bash
-node ~/.pi/agent/bin/plan-mode.mjs sync
+node ~/.agents/skills/plan-start/scripts/plan-mode.mjs sync
 ```
 
 本命令按非破坏方式完成：
